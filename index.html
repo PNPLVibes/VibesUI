@@ -5,14 +5,285 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Llama 3.2 Chat</title>
     <style>
-        /* Your existing CSS styles */
+        :root {
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --background: #1a1a1a;
+            --text: #e5e7eb;
+            --border: #374151;
+            --surface: #2d2d2d;
+        }
+
+        /* Light mode variables */
+        .light-theme {
+            --background: #ffffff;
+            --text: #1a1a1a;
+            --surface: #f9f9f9;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            width: 100%;
+            flex-grow: 1;
+            position: relative; /* For positioning the new chat button */
+        }
+
+        .chat-container {
+            background: var(--surface);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+            border: 1px solid var(--border);
+        }
+
+        .messages {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 1rem;
+            animation: fadeIn 0.3s ease-in;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-message {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .ai-message {
+            background: var(--surface);
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+            border: 1px solid var(--border);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .input-container {
+            border-top: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            gap: 0.5rem;
+            background: var(--surface);
+            position: relative; /* For positioning the new chat button */
+        }
+
+        input {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        .loading {
+            display: none;
+            padding: 1rem;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+        }
+
+        .loading-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--background);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        .powered-by {
+            text-align: center;
+            color: var(--text);
+            font-size: 0.8rem;
+            padding: 0.5rem 0;
+            background: var(--surface);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* New Chat Button */
+        .new-chat-button {
+            position: absolute;
+            top: -2.5rem; /* Position above the input container */
+            right: 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 10; /* Ensure it's above other elements */
+        }
+
+        .new-chat-button:hover {
+            background: var(--primary-hover);
+        }
+
+        .new-chat-button .icon-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .new-chat-button .icon-container svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .new-chat-button .icon-container .plus-icon {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 0.75rem;
+            background: white;
+            color: var(--primary);
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--primary);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                margin: 0;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .chat-container {
+                height: 100vh;
+                border-radius: 0;
+                border: none;
+            }
+
+            .new-chat-button {
+                top: -2rem; /* Adjust for smaller screens */
+                right: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="chat-container">
             <div class="messages" id="messages">
-                <!-- Messages will be loaded here -->
+                <!-- Initial AI message -->
+                <div class="message ai-message">
+                    <img src="ai-avatar.png" class="avatar" alt="AI Avatar">
+                    <div class="content">Hello! I'm Llama 3.2. Ask me anything! 🌙</div>
+                </div>
             </div>
 
             <!-- Typing indicator -->
@@ -24,6 +295,17 @@
 
             <!-- Input container -->
             <div class="input-container">
+                <!-- New Chat Button -->
+                <button id="new-chat" class="new-chat-button">
+                    <div class="icon-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <span class="plus-icon">+</span>
+                    </div>
+                    New Chat
+                </button>
+
                 <input 
                     type="text" 
                     id="prompt" 
@@ -56,29 +338,16 @@
         const typing = document.getElementById('typing');
         const promptInput = document.getElementById('prompt');
         const themeToggle = document.getElementById('theme-toggle');
+        const newChatButton = document.getElementById('new-chat');
         let isMarkedLoaded = false;
         let isTyping = false;
 
-        // Load messages from localStorage on page load
-        function loadMessages() {
-            const savedMessages = localStorage.getItem('chatMessages');
-            if (savedMessages) {
-                messages.innerHTML = savedMessages;
-            } else {
-                // Initial AI message if no messages are saved
-                const initialMessage = `
-                    <div class="message ai-message">
-                        <img src="ai-avatar.png" class="avatar" alt="AI Avatar">
-                        <div class="content">Hello! I'm Llama 3.2. Ask me anything! 🌙</div>
-                    </div>
-                `;
-                messages.innerHTML = initialMessage;
+        // Lazy load marked.js
+        async function loadMarked() {
+            if (!isMarkedLoaded) {
+                await import('https://cdn.jsdelivr.net/npm/marked/marked.min.js');
+                isMarkedLoaded = true;
             }
-        }
-
-        // Save messages to localStorage
-        function saveMessages() {
-            localStorage.setItem('chatMessages', messages.innerHTML);
         }
 
         // Add a new message to the chat
@@ -101,7 +370,6 @@
             }
 
             messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-            saveMessages(); // Save messages after adding a new one
         }
 
         // Handle sending messages
@@ -152,8 +420,34 @@
                     aiMessageDiv.querySelector('.content').innerHTML = marked.parse(aiMessage);
                     aiMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }
-                saveMessages(); // Save messages after AI responds
             } catch (error) {
                 addMessage("Sorry, I'm having trouble responding. Please try again.", 'ai');
                 console.error('Error:', error);
             } finally {
+                typing.style.display = 'none';
+                isTyping = false;
+            }
+        }
+
+        // Start New Chat
+        newChatButton.addEventListener('click', () => {
+            messages.innerHTML = `
+                <div class="message ai-message">
+                    <img src="ai-avatar.png" class="avatar" alt="AI Avatar">
+                    <div class="content">Hello! I'm Llama 3.2. Ask me anything! 🌙</div>
+                </div>
+            `;
+        });
+
+        // Theme toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+        });
+
+        // Keyboard navigation
+        promptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') ask();
+        });
+    </script>
+</body>
+</html>
