@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llama 3.2 Chat</title>
+    <style>
+        /* Your existing CSS styles */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <!-- Messages will be loaded here -->
+            </div>
+
+            <!-- Typing indicator -->
+            <div class="loading" id="typing" style="display: none;">
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+                <div class="loading-dot"></div>
+            </div>
+
+            <!-- Input container -->
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="prompt" 
+                    placeholder="Type your message..."
+                    aria-label="Type your message"
+                    onkeydown="if(event.key === 'Enter') ask()"
+                >
+                <button onclick="ask()" aria-label="Send message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                    </svg>
+                    Send
+                </button>
+            </div>
+
+            <!-- Powered by text -->
+            <div class="powered-by">Powered by PNPL</div>
+        </div>
+    </div>
+
+    <!-- Theme toggle button -->
+    <button id="theme-toggle" class="theme-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <script>
+        const messages = document.getElementById('messages');
+        const typing = document.getElementById('typing');
+        const promptInput = document.getElementById('prompt');
+        const themeToggle = document.getElementById('theme-toggle');
+        let isMarkedLoaded = false;
+        let isTyping = false;
+
+        // Load messages from localStorage on page load
+        function loadMessages() {
+            const savedMessages = localStorage.getItem('chatMessages');
+            if (savedMessages) {
+                messages.innerHTML = savedMessages;
+            } else {
+                // Initial AI message if no messages are saved
+                const initialMessage = `
+                    <div class="message ai-message">
+                        <img src="ai-avatar.png" class="avatar" alt="AI Avatar">
+                        <div class="content">Hello! I'm Llama 3.2. Ask me anything! 🌙</div>
+                    </div>
+                `;
+                messages.innerHTML = initialMessage;
+            }
+        }
+
+        // Save messages to localStorage
+        function saveMessages() {
+            localStorage.setItem('chatMessages', messages.innerHTML);
+        }
+
+        // Add a new message to the chat
+        async function addMessage(content, type) {
+            await loadMarked();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.innerHTML = `
+                <img src="${type === 'user' ? 'user-avatar.png' : 'ai-avatar.png'}" class="avatar" alt="${type === 'user' ? 'User Avatar' : 'AI Avatar'}">
+                <div class="content">${marked.parse(content)}</div>
+                ${type === 'ai' ? '<button class="copy-btn" aria-label="Copy message">Copy</button>' : ''}
+            `;
+            messages.appendChild(messageDiv);
+
+            if (type === 'ai') {
+                messageDiv.querySelector('.copy-btn').addEventListener('click', () => {
+                    navigator.clipboard.writeText(content);
+                    alert('Copied to clipboard!');
+                });
+            }
+
+            messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            saveMessages(); // Save messages after adding a new one
+        }
+
+        // Handle sending messages
+        async function ask() {
+            if (isTyping) return;
+            isTyping = true;
+
+            const prompt = promptInput.value.trim();
+            if (!prompt) return;
+
+            addMessage(prompt, 'user');
+            promptInput.value = '';
+            typing.style.display = 'flex';
+
+            try {
+                const response = await fetch('http://localhost:1337/v1/chat/completions', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json', 
+                        'Authorization': 'Bearer YOUR_API_KEY' 
+                    },
+                    body: JSON.stringify({ 
+                        model: "llama3.2-3b-instruct", 
+                        messages: [{ role: "user", content: prompt }], 
+                        stream: true 
+                    })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let aiMessage = '';
+
+                // Create a single container for the AI's response
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'message ai-message';
+                aiMessageDiv.innerHTML = `
+                    <img src="ai-avatar.png" class="avatar" alt="AI Avatar">
+                    <div class="content"></div>
+                `;
+                messages.appendChild(aiMessageDiv);
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value);
+                    const json = JSON.parse(chunk);
+                    aiMessage += json.choices[0].delta.content || '';
+                    aiMessageDiv.querySelector('.content').innerHTML = marked.parse(aiMessage);
+                    aiMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }
+                saveMessages(); // Save messages after AI responds
+            } catch (error) {
+                addMessage("Sorry, I'm having trouble responding. Please try again.", 'ai');
+                console.error('Error:', error);
+            } finally {
