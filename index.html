@@ -231,6 +231,45 @@
       gap: 0.25rem;
       align-items: center;
     }
+      @media (max-width: 480px) {
+  .container {
+    width: 100%;
+    padding: 0;
+  }
+  .chat-container {
+    height: 90vh;
+    border-radius: 0;
+  }
+  .message {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .avatar {
+    width: 24px;
+    height: 24px;
+    transform: scale(1.2);
+  }
+  .user-message .avatar {
+    transform: scale(1.2);
+  }
+  .input-container {
+    padding: 1rem;
+  }
+  button {
+    padding: 0.5rem;
+  }
+  input {
+    font-size: 1rem;
+  }
+  .theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem;
+  }
+  .theme-toggle svg {
+    width: 14px;
+    height: 14px;
+  }
   </style>
 </head>
 <body>
