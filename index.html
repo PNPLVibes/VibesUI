@@ -276,11 +276,6 @@
   <div class="container">
     <div class="chat-container">
       <div class="messages" id="messages">
-        <!-- Initial AI message -->
-        <div class="message ai-message">
-          <img src="https://assets.zyrosite.com/YrD3QqD87EH4j868/vibes-ai-AVL12D1ajPTv9Oz8.png" class="avatar" alt="Vibes AI Avatar">
-          <div class="content">Hi there! I’m Vibes, your Ethical Non-Monogamous (ENM) AI assistant. I'm here to help navigate this journey with you! 🍍</div>
-        </div>
       </div>
 
       <!-- Typing indicator -->
@@ -330,75 +325,98 @@
     </svg>
   </button>
 
-  <script>
-    const messages = document.getElementById('messages');
-    const typing = document.getElementById('typing');
-    const promptInput = document.getElementById('prompt');
-    const themeToggle = document.getElementById('theme-toggle');
-    const themeIcon = document.getElementById('theme-icon');
-    const moonIcon = document.getElementById('moon-icon');
-    let isMarkedLoaded = false;
-    let isTyping = false;
+<script>
+  const messages = document.getElementById('messages');
+  const typing = document.getElementById('typing');
+  const promptInput = document.getElementById('prompt');
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = document.getElementById('theme-icon');
+  let isMarkedLoaded = false;
+  let isTyping = false;
+  let responseTimeout; // To manage pending AI response timeouts
 
-    // Lazy load marked.js
-    async function loadMarked() {
-      if (!isMarkedLoaded) {
-        await import('https://cdn.jsdelivr.net/npm/marked/marked.min.js');
-        isMarkedLoaded = true;
-      }
+  // Lazy load marked.js
+  async function loadMarked() {
+    if (!isMarkedLoaded) {
+      await import('https://cdn.jsdelivr.net/npm/marked/marked.min.js');
+      isMarkedLoaded = true;
     }
+  }
 
-    // Add a new message to the chat
-    async function addMessage(content, type) {
-      await loadMarked();
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `message ${type}-message`;
-      messageDiv.innerHTML = `
-        <img src="${type === 'user' ? 'https://assets.zyrosite.com/YrD3QqD87EH4j868/untitled-44-mP42gXNOqGTzr1xZ.png' : 'https://assets.zyrosite.com/YrD3QqD87EH4j868/vibes-ai-AVL12D1ajPTv9Oz8.png'}" class="avatar" alt="${type === 'user' ? 'User Avatar' : 'Vibes AI Avatar'}">
-        <div class="content">${marked.parse(content)}</div>
+  // Add a new message to the chat
+  async function addMessage(content, type) {
+    await loadMarked();
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}-message`;
+    messageDiv.innerHTML = `
+      <img src="${type === 'user' ? 'https://assets.zyrosite.com/YrD3QqD87EH4j868/untitled-44-mP42gXNOqGTzr1xZ.png' : 'https://assets.zyrosite.com/YrD3QqD87EH4j868/vibes-ai-AVL12D1ajPTv9Oz8.png'}" class="avatar" alt="${type === 'user' ? 'User Avatar' : 'Vibes AI Avatar'}">
+      <div class="content">${marked.parse(content)}</div>
+    `;
+    messages.appendChild(messageDiv);
+    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  // Function to add the initial AI message
+  function addInitialMessage() {
+    addMessage("Hi there! I’m Vibes, your Ethical Non-Monogamous (ENM) AI assistant. I'm here to help navigate this journey with you! 🍍", 'ai');
+  }
+
+  // Ask function for sending user input
+  async function ask() {
+    const prompt = promptInput.value.trim();
+    if (!prompt) return;
+    addMessage(prompt, 'user');
+    promptInput.value = '';
+    typing.style.display = 'flex';
+    isTyping = true;
+    // Simulate AI response
+    responseTimeout = setTimeout(() => {
+      typing.style.display = 'none';
+      addMessage("This is an AI response.", 'ai');
+      isTyping = false;
+      responseTimeout = null;
+    }, 2000);
+  }
+
+  // Add initial message on page load
+  addInitialMessage();
+
+  // Theme toggle functionality
+  themeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    if (document.body.classList.contains('light-theme')) {
+      // Switch to sun icon in light mode
+      themeIcon.innerHTML = `
+        <circle cx="12" cy="12" r="5" />
+        <line x1="12" y1="2" x2="12" y2="5" />
+        <line x1="12" y1="19" x2="12" y2="22" />
+        <line x1="2" y1="12" x2="5" y2="12" />
+        <line x1="19" y1="12" x2="22" y2="12" />
+        <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
+        <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
+        <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
+        <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
       `;
-      messages.appendChild(messageDiv);
-      messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    } else {
+      // Switch to moon icon in dark mode
+      themeIcon.innerHTML = `
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      `;
     }
+  });
 
-    // Ask function for sending user input
-    async function ask() {
-      const prompt = promptInput.value.trim();
-      if (!prompt) return;
-      addMessage(prompt, 'user');
-      promptInput.value = '';
-      typing.style.display = 'flex';
-      isTyping = true;
-      // Simulate AI response
-      setTimeout(() => {
-        typing.style.display = 'none';
-        addMessage("This is an AI response.", 'ai');
-      }, 2000);
+  // New Chat button functionality
+  document.getElementById('new-chat').addEventListener('click', () => {
+    if (responseTimeout) {
+      clearTimeout(responseTimeout);
+      responseTimeout = null;
     }
-
-    // Theme toggle functionality
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('light-theme');
-      if (document.body.classList.contains('light-theme')) {
-        // Switch to sun icon in light mode
-        themeIcon.innerHTML = `
-          <circle cx="12" cy="12" r="5" />
-          <line x1="12" y1="2" x2="12" y2="5" />
-          <line x1="12" y1="19" x2="12" y2="22" />
-          <line x1="2" y1="12" x2="5" y2="12" />
-          <line x1="19" y1="12" x2="22" y2="12" />
-          <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
-          <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
-          <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
-          <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
-        `;
-      } else {
-        // Switch to moon icon in dark mode
-        themeIcon.innerHTML = `
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        `;
-      }
-    });
-  </script>
+    typing.style.display = 'none';
+    isTyping = false;
+    messages.innerHTML = '';
+    addInitialMessage();
+    promptInput.focus();
+  });
+</script>
 </body>
 </html>
