@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Llama 3.2 Chat</title>
+    <title>PNPL Vibes AI</title>
     <style>
         :root {
             --primary: #3b82f6;
@@ -43,7 +43,7 @@
             padding: 0 1rem;
             width: 100%;
             flex-grow: 1;
-            position: relative; /* For positioning the new chat button */
+            position: relative;
         }
 
         .chat-container {
@@ -103,7 +103,7 @@
             display: flex;
             gap: 0.5rem;
             background: var(--surface);
-            position: relative; /* For positioning the new chat button */
+            position: relative;
         }
 
         input {
@@ -205,73 +205,23 @@
             cursor: pointer;
         }
 
-        /* New Chat Button */
-        .new-chat-button {
-            position: absolute;
-            top: -2.5rem; /* Position above the input container */
-            right: 1.5rem;
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            z-index: 10; /* Ensure it's above other elements */
-        }
-
-        .new-chat-button:hover {
-            background: var(--primary-hover);
-        }
-
-        .new-chat-button .icon-container {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .new-chat-button .icon-container svg {
+        /* SVG styling for light and dark theme toggle */
+        .theme-toggle svg {
             width: 16px;
             height: 16px;
         }
-
-        .new-chat-button .icon-container .plus-icon {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            font-size: 0.75rem;
-            background: white;
-            color: var(--primary);
-            border-radius: 50%;
-            width: 14px;
-            height: 14px;
+        
+        /* New chat icon container styling */
+        .new-chat-button .icon-container {
             display: flex;
             align-items: center;
-            justify-content: center;
-            border: 1px solid var(--primary);
         }
-
-        @media (max-width: 640px) {
-            .container {
-                margin: 0;
-                height: 100vh;
-                border-radius: 0;
-            }
-            
-            .chat-container {
-                height: 100vh;
-                border-radius: 0;
-                border: none;
-            }
-
-            .new-chat-button {
-                top: -2rem; /* Adjust for smaller screens */
-                right: 1rem;
-            }
+        
+        /* New chat button override for shorter length and reduced gap */
+        .new-chat-button {
+            padding: 0.25rem 0.5rem;
+            gap: 0.25rem;
+            align-items: center;
         }
     </style>
 </head>
@@ -281,7 +231,7 @@
             <div class="messages" id="messages">
                 <!-- Initial AI message -->
                 <div class="message ai-message">
-                    <img src="ai-avatar.png" class="avatar" alt="AI Avatar">
+                    <img src="https://assets.zyrosite.com/YrD3QqD87EH4j868/untitled-66-AQEDrzB2r8fjDyxV.png" class="avatar" alt="AI Avatar">
                     <div class="content">Hi there! I’m Vibes, your Ethical Non-Monogamous (ENM) AI assistant. I'm here to help navigate this journey with you! 🍍</div>
                 </div>
             </div>
@@ -301,7 +251,6 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
-                        <span class="plus-icon">+</span>
                     </div>
                     New Chat
                 </button>
@@ -328,8 +277,9 @@
 
     <!-- Theme toggle button -->
     <button id="theme-toggle" class="theme-toggle">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        <svg id="theme-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Default moon icon -->
+            <path id="moon-icon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
     </button>
 
@@ -338,7 +288,8 @@
         const typing = document.getElementById('typing');
         const promptInput = document.getElementById('prompt');
         const themeToggle = document.getElementById('theme-toggle');
-        const newChatButton = document.getElementById('new-chat');
+        const themeIcon = document.getElementById('theme-icon');
+        const moonIcon = document.getElementById('moon-icon');
         let isMarkedLoaded = false;
         let isTyping = false;
 
@@ -356,97 +307,50 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}-message`;
             messageDiv.innerHTML = `
-                <img src="${type === 'user' ? 'user-avatar.png' : 'ai-avatar.png'}" class="avatar" alt="${type === 'user' ? 'User Avatar' : 'AI Avatar'}">
+                <img src="${type === 'user' ? 'user-avatar.png' : 'https://assets.zyrosite.com/YrD3QqD87EH4j868/untitled-66-AQEDrzB2r8fjDyxV.png'}" class="avatar" alt="${type === 'user' ? 'User Avatar' : 'AI Avatar'}">
                 <div class="content">${marked.parse(content)}</div>
-                ${type === 'ai' ? '<button class="copy-btn" aria-label="Copy message">Copy</button>' : ''}
             `;
             messages.appendChild(messageDiv);
-
-            if (type === 'ai') {
-                messageDiv.querySelector('.copy-btn').addEventListener('click', () => {
-                    navigator.clipboard.writeText(content);
-                    alert('Copied to clipboard!');
-                });
-            }
-
             messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
         }
 
-        // Handle sending messages
+        // Ask function for sending user input
         async function ask() {
-            if (isTyping) return;
-            isTyping = true;
-
             const prompt = promptInput.value.trim();
             if (!prompt) return;
-
             addMessage(prompt, 'user');
             promptInput.value = '';
             typing.style.display = 'flex';
-
-            try {
-                const response = await fetch('http://localhost:1337/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json', 
-                        'Authorization': 'Bearer YOUR_API_KEY' 
-                    },
-                    body: JSON.stringify({ 
-                        model: "llama3.2-3b-instruct", 
-                        messages: [{ role: "user", content: prompt }], 
-                        stream: true 
-                    })
-                });
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-                let aiMessage = '';
-
-                // Create a single container for the AI's response
-                const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'message ai-message';
-                aiMessageDiv.innerHTML = `
-                    <img src="ai-avatar.png" class="avatar" alt="AI Avatar">
-                    <div class="content"></div>
-                `;
-                messages.appendChild(aiMessageDiv);
-
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const chunk = decoder.decode(value);
-                    const json = JSON.parse(chunk);
-                    aiMessage += json.choices[0].delta.content || '';
-                    aiMessageDiv.querySelector('.content').innerHTML = marked.parse(aiMessage);
-                    aiMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                }
-            } catch (error) {
-                addMessage("Sorry, I'm having trouble responding. Please try again.", 'ai');
-                console.error('Error:', error);
-            } finally {
+            isTyping = true;
+            // Simulate AI response
+            setTimeout(() => {
                 typing.style.display = 'none';
-                isTyping = false;
-            }
+                addMessage("This is an AI response.", 'ai');
+            }, 2000);
         }
 
-        // Start New Chat
-        newChatButton.addEventListener('click', () => {
-            messages.innerHTML = `
-                <div class="message ai-message">
-                    <img src="ai-avatar.png" class="avatar" alt="AI Avatar">
-                    <div class="content">Hey there! I’m Vibes, your Ethical Non-Monogamous (ENM) AI assistant. Let’s navigate this journey together! 🍍</div>
-                </div>
-            `;
-        });
-
-        // Theme toggle
+        // Theme toggle functionality
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
-        });
-
-        // Keyboard navigation
-        promptInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') ask();
+            if (document.body.classList.contains('light-theme')) {
+                // Switch to sun icon in light mode
+                themeIcon.innerHTML = `
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="2" x2="12" y2="5" />
+                    <line x1="12" y1="19" x2="12" y2="22" />
+                    <line x1="2" y1="12" x2="5" y2="12" />
+                    <line x1="19" y1="12" x2="22" y2="12" />
+                    <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
+                    <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
+                    <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
+                    <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
+                `;
+            } else {
+                // Switch to moon icon in dark mode
+                themeIcon.innerHTML = `
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                `;
+            }
         });
     </script>
 </body>
