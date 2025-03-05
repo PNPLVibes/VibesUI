@@ -13,7 +13,6 @@
       --border: #374151;
       --surface: #2d2d2d;
     }
-
     /* Light mode variables */
     .light-theme {
       --background: #ffffff;
@@ -21,14 +20,12 @@
       --surface: #f9f9f9;
       --border: #e5e7eb;
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     }
-
     body {
       background: transparent;
       color: var(--text);
@@ -36,14 +33,12 @@
       display: flex;
       flex-direction: column;
     }
-
     .container {
-      width: 90vw;          /* 90% of the viewport width */
-      max-width: 600px;     /* But no more than 600px */
-      margin: 2vh auto;     /* Center container horizontally */
+      width: 90vw;
+      max-width: 600px;
+      margin: 2vh auto;
       padding: 0 1rem;
     }
-
     .chat-container {
       background: var(--surface);
       border-radius: 1rem;
@@ -54,7 +49,6 @@
       height: 70vh;
       border: 1px solid var(--border);
     }
-
     .messages {
       flex-grow: 1;
       padding: 1.5rem;
@@ -63,7 +57,6 @@
       flex-direction: column;
       gap: 1rem;
     }
-
     .message {
       max-width: 95%;
       padding: 0.5rem;
@@ -74,7 +67,6 @@
       align-items: center;
       gap: 0.75rem;
     }
-
     .user-message {
       background: var(--primary);
       color: white;
@@ -82,14 +74,12 @@
       border-bottom-right-radius: 0.25rem;
       gap: 0.5rem;
     }
-
     .ai-message {
       background: var(--surface);
       align-self: flex-start;
       border-bottom-left-radius: 0.25rem;
       border: 1px solid var(--border);
     }
-
     .avatar {
       width: 32px;
       height: 32px;
@@ -97,11 +87,9 @@
       transform: scale(1.5);
       transform-origin: center;
     }
-
     .user-message .avatar {
       transform: scale(1.3);
     }
-
     .input-container {
       border-top: 1px solid var(--border);
       padding: 1.5rem;
@@ -110,7 +98,6 @@
       background: var(--surface);
       position: relative;
     }
-
     input {
       flex-grow: 1;
       padding: 0.75rem 1rem;
@@ -121,13 +108,11 @@
       background: var(--surface);
       color: var(--text);
     }
-
     input:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
-
     button {
       background: var(--primary);
       color: white;
@@ -140,11 +125,9 @@
       align-items: center;
       gap: 0.5rem;
     }
-
     button:hover {
       background: var(--primary-hover);
     }
-
     .loading {
       display: none;
       padding: 1rem;
@@ -153,7 +136,6 @@
       gap: 0.5rem;
       color: var(--text);
     }
-
     .loading-dot {
       width: 0.5rem;
       height: 0.5rem;
@@ -161,35 +143,28 @@
       border-radius: 50%;
       animation: bounce 1.4s infinite ease-in-out;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes bounce {
       0%, 80%, 100% { transform: translateY(0); }
       40% { transform: translateY(-6px); }
     }
-
     ::-webkit-scrollbar {
       width: 8px;
     }
-
     ::-webkit-scrollbar-track {
       background: var(--background);
       border-radius: 4px;
     }
-
     ::-webkit-scrollbar-thumb {
       background: var(--border);
       border-radius: 4px;
     }
-
     ::-webkit-scrollbar-thumb:hover {
       background: var(--primary);
     }
-
     .powered-by {
       text-align: center;
       color: var(--text);
@@ -197,7 +172,6 @@
       padding: 0.5rem 0;
       background: var(--surface);
     }
-
     .theme-toggle {
       position: fixed;
       top: 1rem;
@@ -209,12 +183,10 @@
       border-radius: 50%;
       cursor: pointer;
     }
-
     .theme-toggle svg {
       width: 16px;
       height: 16px;
     }
-    
     /* New Chat button styling: now in normal flow, above the input container */
     .new-chat-button {
       align-self: flex-end;
@@ -230,11 +202,9 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    
     .new-chat-button:hover {
       background: var(--primary-hover);
     }
-    
     @media (max-width: 600px) {
       .container {
         width: 100%;
@@ -311,8 +281,7 @@
           id="prompt" 
           placeholder="Type your message..."
           aria-label="Type your message"
-          onkeydown="if(event.key === 'Enter') ask()"
-        >
+          onkeydown="if(event.key === 'Enter') ask()">
         <button onclick="ask()" aria-label="Send message">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/>
@@ -342,7 +311,7 @@
     let isTyping = false;
     let responseTimeout; // To manage pending AI response timeouts
 
-    // Lazy load marked.js
+    // Lazy load marked.js for markdown formatting
     async function loadMarked() {
       if (!isMarkedLoaded) {
         await import('https://cdn.jsdelivr.net/npm/marked/marked.min.js');
@@ -360,39 +329,74 @@
         <div class="content">${marked.parse(content)}</div>
       `;
       messages.appendChild(messageDiv);
-      
+      // Auto-scroll to the bottom after adding a message
+      messageDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
 
-    // Function to add the initial AI message
+    // Function to add the initial AI message on page load
     function addInitialMessage() {
       addMessage("Hi there! I’m Vibes, your Ethical Non-Monogamous (ENM) AI assistant. I'm here to help navigate this journey with you! 🍍", 'ai');
     }
 
-    // Ask function for sending user input
+    // Ask function to send user input to the Jan AI server and retrieve a response
     async function ask() {
       const prompt = promptInput.value.trim();
       if (!prompt) return;
+      if (isTyping) return; // Prevent overlapping requests
+      
       addMessage(prompt, 'user');
       promptInput.value = '';
       typing.style.display = 'flex';
       isTyping = true;
-      // Simulate AI response
-      responseTimeout = setTimeout(() => {
-        typing.style.display = 'none';
-        addMessage("This is an AI response.", 'ai');
+      
+      // Construct the API payload using correct keys
+      const data = {
+        model: "llama3.2-3b-instruct",
+        messages: [
+          { role: "system", content: "You are a helpful Ethical Non-Monogamy (ENM) AI assistant." },
+          { role: "user", content: prompt }
+        ],
+        max_tokens: 2048,
+        stream: false,
+        stop: null,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+        temperature: 0.7,
+        top_p: 0.95
+      };
+
+      try {
+        const response = await fetch("http://127.0.0.1:1337/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const json = await response.json();
+        const aiText = json.choices[0].message.content;
+        console.log(aiText);
+        addMessage(aiText, 'ai');
         isTyping = false;
-        responseTimeout = null;
-      }, 2000);
+        typing.style.display = 'none';
+      } catch (error) {
+        console.error("Error:", error);
+        addMessage("Error: Unable to generate a response. Check the server logs.", 'ai');
+        isTyping = false;
+        typing.style.display = 'none';
+      }
     }
 
-    // Add initial message on page load
+    // Add the initial message when the page loads
     addInitialMessage();
 
     // Theme toggle functionality
     themeToggle.addEventListener('click', () => {
       document.body.classList.toggle('light-theme');
       if (document.body.classList.contains('light-theme')) {
-        // Switch to sun icon in light mode
         themeIcon.innerHTML = `
           <circle cx="12" cy="12" r="5" />
           <line x1="12" y1="2" x2="12" y2="5" />
@@ -405,14 +409,13 @@
           <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
         `;
       } else {
-        // Switch to moon icon in dark mode
         themeIcon.innerHTML = `
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         `;
       }
     });
 
-    // New Chat button functionality
+    // New Chat button functionality: reset chat history
     document.getElementById('new-chat').addEventListener('click', () => {
       if (responseTimeout) {
         clearTimeout(responseTimeout);
